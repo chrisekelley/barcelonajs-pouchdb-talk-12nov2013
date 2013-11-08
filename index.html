@@ -1,10 +1,11 @@
 <!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"><title>Using PouchDB for </title><link rel="stylesheet" type="text/css" href="bower_components/prism/themes/prism-tomorrow.css"><link rel="stylesheet" type="text/css" href="styles/main.css"></head><body><article><section><h2>Using PouchDB for PhoneGap/Cordova apps</h2><p>Chris Kelley</p>@chrisekelley</section><section><h2>Under Construction</h2><p>3/11/2013: I've created a few slides; however, there are more to come.</p><p>I will be updating these slides up to the date of my presentation on 12 November.</p><p>I'm designing this with bespoke.js.</p></section><section><h3>UBridge: SMS -> Couch on Android in Uganda</h3><img src="images/olutindoFlier.jpg"></section><section><h2>UBridge</h2><img src="images/olutindoAppHome.png" width="240" height="400" id="olutindoAppHome"></section><section><h2>Sustainability</h2><p>Reduce monthly data costs</p></section><section><h2 class="bullet">Hosting</h2><ul><li>Iriscouch - CORS support</li><li>Cloudant - BYO reverse proxy</li><li>Urban Airship - Notifications</li></ul></section><section><h2 class="bullet">Using</h2><ul><li>Apache CouchDB</li><li>PouchDB</li><li>Phonegap/Cordova 3.x</li><li>Backbone.js</li><li>Backbone-pouch.js</li><li>Coconut</li></ul></section><section><h2>Why PouchDB?</h2></section><section><h2>hood.ie!</h2></section><section><h2>Development Approach</h2><h3 class="bullet">2 projects</h3><ul><li>Web app</li><li>Android app</li></ul></section><section><h2>Building the Android app</h2><p>build.sh</p><code class="language-javascript"><pre>grunt cordova-build
 adb uninstall org.rti.olutindo_app
-adb install -r platforms/android/bin/Olutindo-debug.apk</pre></code></section><section><h2>Converting CouchDB Views</h2><p>Created pouchdb_views.js and named each query:</p><code class="language-javascript"><pre>var bySearchKeywords = function(doc) {
+adb install -r platforms/android/bin/Olutindo-debug.apk</pre></code></section><section><h2>Transitioning TouchDB to PouchDB</h2></section><section><h2>Converting CouchDB Views</h2><p>Created pouchdb_views.js and named each query:</p><code class="language-javascript"><pre>var bySearchKeywords = function(doc) {
   if(doc.phone) {
     emit(doc.phone, doc);
   }
-}</pre></code></section><section><h2>PouchDB Query Example</h2><hr><code class="language-javascript"><pre>searchResults.fetch(
+}
+</pre></code></section><section><h2>PouchDB Query Example</h2><hr><code class="language-javascript"><pre>searchResults.fetch(
   {fetch: 'query',
     options: {
         query: {
@@ -18,7 +19,8 @@ adb install -r platforms/android/bin/Olutindo-debug.apk</pre></code></section><s
         var Home = new HomeView(
             {model: page, el: $(&quot;#homePageView&quot;)});
     }}
-);</pre></code></section><section><h2>Development Issues</h2><h3 class="bullet">Need to handle CORS:</h3><ul><li>Cordova fine</li><li>WebDev not</li></ul><code class="language-javascript"><pre>var remoteCouch = &quot;http://localhost:3000/troubletickets/&quot;
+);
+</pre></code></section><section><h2>Connector<h3 class="bullet">backbone-pouch.js</h3><p>http://jo.github.io/backbone-pouch/</p></h2></section><section><h2>Development Issues</h2><h3 class="bullet">Need to handle CORS:</h3><ul><li>Cordova fine</li><li>WebDev not</li></ul><code class="language-javascript"><pre>var remoteCouch = &quot;http://localhost:3000/troubletickets/&quot;
 + subdomain + &quot;/&quot; + credentials;
 if (navigator.userAgent.match(/(iPhone|iPod|iPad|Android|BlackBerry|IEMobile)/)) {
   remoteCouch = &quot;https://&quot; + credentials + &quot;@&quot; + subdomain
