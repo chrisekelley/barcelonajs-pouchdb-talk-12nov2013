@@ -21,3 +21,36 @@ Then, install dependencies and run the preview server:
 $ npm install && bower install
 $ grunt server
 ```
+
+## To deploy to github-pages:
+
+https://github.com/weavejester/codox/wiki/Deploying-to-GitHub-Pages
+
+Inside your project directory, run the following commands:
+
+    rm -rf public && mkdir public
+    git clone git@github.com:chrisekelley/barcelonajs-pouchdb-talk-12nov2013.git public
+    cd public
+    git symbolic-ref HEAD refs/heads/gh-pages
+    rm .git/index
+    git clean -fdx
+    cd ..
+Build your documentation
+
+    grunt server
+
+To publish your docs to Github Pages, run the following commands:
+
+    cd public
+    git checkout gh-pages # To be sure you're on the right branch
+    git add .
+    git commit -am "updated ...."
+    git push -u origin gh-pages
+    cd ..
+
+For subsequent updates,
+
+    cd public
+    git add index.html
+    git commit -am "updated ...."
+    git push -u origin gh-pages

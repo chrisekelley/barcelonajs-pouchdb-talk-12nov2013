@@ -46,6 +46,7 @@ html
         h2 Why PouchDB?
       section
         h2 hood.ie!
+        p Not using but loving.
       section
         h2 Development Approach
         h3.bullet 2 projects
@@ -61,6 +62,9 @@ html
             adb uninstall org.rti.olutindo_app
             adb install -r platforms/android/bin/Olutindo-debug.apk
       section
+        h2 Transitioning TouchDB to PouchDB
+
+      section
         h2 Converting CouchDB Views
         p Created pouchdb_views.js and named each query:
         code.language-javascript
@@ -70,6 +74,7 @@ html
                 emit(doc.phone, doc);
               }
             }
+
       section
         h2 PouchDB Query Example
         hr
@@ -90,6 +95,12 @@ html
                         {model: page, el: $("#homePageView")});
                 }}
              );
+
+      section
+        h2 Connector
+          h3.bullet backbone-pouch.js
+          p http://jo.github.io/backbone-pouch/
+
       section
         h2 Development Issues
         h3.bullet Need to handle CORS:
@@ -131,10 +142,7 @@ html
              }else{
                next();
              }
-      section
-        h2 Notifications
-        p Urban Airship
-        p Lower data costs: switch from continuous replication by using notifications
+
       section
         h2 Using Cordova
         ul
@@ -154,6 +162,35 @@ html
         code.language-javascript
           pre.
              cordova plugin add https://github.com/urbanairship/phonegap-ua-push.git
+      section
+        h2 Handling plugins
+        h3.bullet Handling plugin javascript
+        code.language-javascript
+          pre.
+            if (navigator.useragent.match(/(iPhone|iPod|iPad|Android|BlackBerry|IEMobile)/)) {
+              loadScript('cordova.js');
+              loadScript('version.js');
+              loadScript('sms.js');
+              loadScript('js/PushNotification.js');
+              }
+      section
+        h2 Handling plugins
+        h3.bullet Finding plugin instance
+          code.language-javascript
+            pre.
+              <js-module src="www/sms.js" name="Sms">
+                <clobbers target="window.sms" />
+              </js-module>
+        h3.bullet Testing plugin instance
+          code.language-javascript
+            pre.
+              if (typeof window.sms != 'undefined') {
+                  // code
+              }
+      section
+        h2 Notifications using PushNotification
+        h3.bullet Urban Airship
+        p Lower data costs: switch from continuous replication by using notifications
       section
         h2 Thanks!
         p Under Construction
