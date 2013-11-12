@@ -1,6 +1,12 @@
-<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"><title>Using PouchDB for </title><link rel="stylesheet" type="text/css" href="bower_components/prism/themes/prism-tomorrow.css"><link rel="stylesheet" type="text/css" href="styles/main.css"></head><body><article><section><h2>Using PouchDB for PhoneGap/Cordova apps</h2><p>Chris Kelley</p>@chrisekelley</section><section><h2>Under Construction</h2><p>3/11/2013: I've created a few slides; however, there are more to come.</p><p>I will be updating these slides up to the date of my presentation on 12 November.</p><p>I'm designing this with bespoke.js.</p></section><section><h3>UBridge: SMS -> Couch on Android in Uganda</h3><img src="images/olutindoFlier.jpg"></section><section><h2>UBridge</h2><img src="images/olutindoAppHome.png" width="240" height="400" id="olutindoAppHome"></section><section><h2>Sustainability</h2><p>Reduce monthly data costs</p></section><section><h2 class="bullet">Hosting</h2><ul><li>Iriscouch - CORS support</li><li>Cloudant - BYO reverse proxy</li><li>Urban Airship - Notifications</li></ul></section><section><h2 class="bullet">Using</h2><ul><li>Apache CouchDB</li><li>PouchDB</li><li>Phonegap/Cordova 3.x</li><li>Backbone.js</li><li>Backbone-pouch.js</li><li>Coconut</li></ul></section><section><h2>Why PouchDB?</h2></section><section><h2>hood.ie!</h2><p>Not using but loving.</p></section><section><h2>Development Approach</h2><h3 class="bullet">2 projects</h3><ul><li>Web app</li><li>Android app</li></ul></section><section><h2>Building the Android app</h2><p>build.sh</p><code class="language-javascript"><pre>grunt cordova-build
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"><title>Using PouchDB for </title><link rel="stylesheet" type="text/css" href="bower_components/prism/themes/prism-tomorrow.css"><link rel="stylesheet" type="text/css" href="styles/main.css"></head><body><article><section><h2>Using PouchDB for PhoneGap/Cordova apps</h2><h3>Chris Kelley</h3><p>chrisekelley</p><p>on github and twitter.</p></section><section><h3>UBridge: SMS -> Couch on Android in Uganda</h3><img src="images/olutindoFlier.jpg"></section><section><h2>UBridge</h2><img src="images/olutindoAppHome.png" width="240" height="400" id="olutindoAppHome"></section><section><h2>UBridge diagram</h2><img src="images/oluntindo-diagrams.png"></section><section><h2 class="bullet">Hosting Criteria</h2><ul><li>Reliability</li><li>Sustainability - Reduce monthly data costs</li></ul></section><section><h2 class="bullet">Hosting</h2><ul><li>Iriscouch - CORS support</li><li>Cloudant - BYO reverse proxy</li><li>Urban Airship - Notifications</li></ul></section><section><h2 class="bullet">Using</h2><ul><li>Apache CouchDB - server</li><li>PouchDB - local DB</li><li>Phonegap/Cordova 3.x - container</li><li>Backbone.js - MVC</li><li>Backbone-pouch.js - DB connector</li><li>Coconut - Form rendering</li></ul></section><section><h2>Mobile Platform & Devices</h2><ul><li>Android</li><li>Samsung Galaxy Tab 1 & 2</li><li>Huawei Ascend Y300</li></ul></section><section><h2>Why PouchDB?</h2></section><section><h2>Development Approach</h2><h3 class="bullet">2 projects</h3><ul><li>Web app</li><li>Android app</li></ul></section><section><h2>Building the Android app</h2><p>build.sh</p><code class="language-javascript"><pre>grunt cordova-build
 adb uninstall org.rti.olutindo_app
-adb install -r platforms/android/bin/Olutindo-debug.apk</pre></code></section><section><h2>Transitioning TouchDB to PouchDB</h2></section><section><h2>Converting CouchDB Views</h2><p>Created pouchdb_views.js and named each query:</p><code class="language-javascript"><pre>var bySearchKeywords = function(doc) {
+adb install -r platforms/android/bin/Olutindo-debug.apk
+</pre></code></section><section><h2>Transitioning TouchDB to PouchDB</h2></section><section><h2>Converting CouchDB Views</h2><p>Created pouchdb_views.js and named each query:</p><code class="language-javascript"><pre>var byIncidentSorted = function(doc) {
+  if (doc.formId === &quot;incident&quot;) {
+    emit(doc.lastModified, doc);
+  }
+}
+var bySearchKeywords = function(doc) {
   if(doc.phone) {
     emit(doc.phone, doc);
   }
@@ -20,16 +26,51 @@ adb install -r platforms/android/bin/Olutindo-debug.apk</pre></code></section><s
             {model: page, el: $(&quot;#homePageView&quot;)});
     }}
 );
-</pre></code></section><section><h2>Connector<h3 class="bullet">backbone-pouch.js</h3><p>http://jo.github.io/backbone-pouch/</p></h2></section><section><h2>Development Issues</h2><h3 class="bullet">Need to handle CORS:</h3><ul><li>Cordova fine</li><li>WebDev not</li></ul><code class="language-javascript"><pre>var remoteCouch = &quot;http://localhost:3000/troubletickets/&quot;
-+ subdomain + &quot;/&quot; + credentials;
-if (navigator.userAgent.match(/(iPhone|iPod|iPad|Android|BlackBerry|IEMobile)/)) {
-  remoteCouch = &quot;https://&quot; + credentials + &quot;@&quot; + subdomain
-  + &quot;.cloudant.com/troubletickets/&quot;;
-}</pre></code></section><section><h2>CORS solution:</h2><p>Using express + request to reverse proxy replication</p><p>app.js:</p><code class="language-javascript"><pre>var forward = require('./forward.js');
+</pre></code></section><section><h2>PouchDB Query Examples</h2><h3>Fetch</h3><code class="language-javascript"><pre>var record = new Incident({_id: incidentId});
+record.fetch( {
+  success: function(model){
+  // do something
+    });
+  }
+});</pre></code><h3>Save</h3><code class="language-javascript"><pre>var record = new Record(formData);
+record.save();
+</pre></code></section><section><h2>Does it really have IndexedDB?</h2><hr><code class="language-javascript"><pre>var ua = navigator.userAgent;
+var is412 = ua.indexOf(&quot;4.1.2&quot;);
+var isGTP6200 = ua.indexOf(&quot;GT-P6200&quot;);
+if ((is412) &amp;&amp; (isGTP6200))
+{
+  Backbone.sync = BackbonePouch.sync({
+    db: PouchDB('websql://troubletickets')
+  });
+} else {
+  Backbone.sync = BackbonePouch.sync({
+    db: PouchDB('troubletickets')
+  });
+}
+</pre></code></section><section><h2>Pagination</h2><h3 class="bullet">Use endkey instead of startkey for descending order.</h3><hr><code class="language-javascript"><pre>var opts = {
+  query: {
+    fun: {map: byIncidentSorted}
+    , descending:true
+    , endkey:parseInt(endkey)
+    , limit:limit
+  }
+}
+</pre></code></section><section><h2>Replication</h2><h3 class="bullet">CouchDB</h3><code class="language-javascript"><pre>var credentials = account.username + &quot;:&quot; + account.password;
+couch = &quot;http://&quot; + credentials + &quot;@192.168.1.60:5984/&quot; + couchdb + &quot;/&quot;;
+var opts = {continuous: true,
+  withCredentials:true,
+  auth: {username:account.username, password:account.password},
+  complete: onComplete,
+  timeout: 60000};
+Backbone.sync.defaults.db.replicate.to(couch, opts, ReplicationErrorLog);
+Backbone.sync.defaults.db.replicate.from(couch, opts, ReplicationErrorLog);
+</pre></code></section><section><h2 class="bullet">Developing with PouchDB</h2><ul><li>Dev Tools -> Resources -> IndexedDB</li><li>Removing the pouch<code class="language-javascript"><pre>indexedDB.deleteDatabase('_pouch_troubletickets');
+</pre></code></li></ul></section><section><h2 class="bullet">Puton</h2><hr><img src="images/puton.png"></section><section><h2>Development Issue</h2><h3>CORS: Cross-origin resource sharing</h3><p>(bypass same origin security policy)</p><img src="images/sameOriginPolicy.png"></section><!--image kudos: http://www.quimeraazul.com/tutoriales/2011/02/ajax-entre-dominios-con-el-estandar-cors-cross-origin-resource-sharing/--><section><h2>Where to enable CORS?</h2><h3 class="bullet">Cloudant needs CORS.</h3><ul><li>Cordova fine - same origin security policy disabled</li><li>For browser dev, must enable CORS</li></ul></section><section><h2>CORS solution:</h2><h3>Using express for dev + request to reverse proxy replication</h3><p>app.js for express:</p><code class="language-javascript"><pre>var forward = require('./forward.js');
 //typical static express config
 app.use(express.static(__dirname + '../../www'));
 var target_url = &quot;cloudant.com/troubletickets&quot;
-app.use(forward(/\/troubletickets\/(.*)/, target_url));</pre></code></section><section><h2>CORS</h2><p>Using express + request to reverse proxy replication</p><p>forward.js:</p><code class="language-javascript"><pre>if(req.url.match(pattern)){
+app.use(forward(/\/troubletickets\/(.*)/, target_url));
+</pre></code></section><section><h2>CORS solution:</h2><p>Using express + request to reverse proxy replication</p><p>forward.js:</p><code class="language-javascript"><pre>if(req.url.match(pattern)){
   var db_path = req.url.match(pattern)[1], parts = db_path.split(&quot;/&quot;);
   var subdomain = parts[0], credentials = parts[1];
   var query = parts[2];
@@ -39,13 +80,21 @@ app.use(forward(/\/troubletickets\/(.*)/, target_url));</pre></code></section><s
 }else{
   next();
 }
-</pre></code></section><section><h2>Using Cordova</h2><ul><li>Plugins are cool!</li><li>Do enough plugins support Cordova 3.0?</li></ul></section><section><h2>Plugins i'm using</h2><ul><li>Version</li><li>WebIntent</li><li>Urban Airship PushNotification</li><li>file-transfer</li><li>SMS</li><li>Prefs</li></ul></section><section><h2>Adding a plugin</h2><code class="language-javascript"><pre>cordova plugin add https://github.com/urbanairship/phonegap-ua-push.git</pre></code></section><section><h2>Handling plugins</h2><h3 class="bullet">Handling plugin javascript</h3><code class="language-javascript"><pre>if (navigator.useragent.match(/(iPhone|iPod|iPad|Android|BlackBerry|IEMobile)/)) {
+</pre></code></section><section><h2>CORS solution:</h2><h3 class="bullet">Replication</h3><code class="language-javascript"><pre>var remoteCouch = &quot;http://localhost:3000/troubletickets/&quot;
++ subdomain + &quot;/&quot; + credentials;
+if (navigator.userAgent.match(/(iPhone|Android)/)) {
+  remoteCouch = &quot;https://&quot; + credentials + &quot;@&quot; + subdomain
+  + &quot;.cloudant.com/troubletickets/&quot;;
+}
+Backbone.sync.defaults.db.replicate.to(couch, opts, ReplicationErrorLog);
+Backbone.sync.defaults.db.replicate.from(couch, opts, ReplicationErrorLog);
+</pre></code></section><section><h2>Using Cordova</h2><h3 class="bullet">Do enough plugins support Cordova 3.0?</h3></section><section><h2>Plugins i'm using</h2><ul><li>Version</li><li>WebIntent</li><li>Urban Airship PushNotification</li><li>file-transfer</li><li>SMS</li><li>Prefs</li></ul></section><section><h2>Adding a plugin</h2><code class="language-javascript"><pre>cordova plugin add https://github.com/urbanairship/phonegap-ua-push.git</pre></code></section><section><h2>Handling plugins</h2><h3 class="bullet">Load Cordova .js in Cordova only.</h3><code class="language-javascript"><pre>if (navigator.useragent.match(/(iPhone|iPod|iPad|Android|BlackBerry|IEMobile)/)) {
   loadScript('cordova.js');
   loadScript('version.js');
   loadScript('sms.js');
   loadScript('js/PushNotification.js');
-  }</pre></code></section><section><h2>Handling plugins</h2><h3 class="bullet">Finding plugin instance<code class="language-javascript"><pre>&lt;js-module src=&quot;www/sms.js&quot; name=&quot;Sms&quot;&gt;
+  }</pre></code></section><section><h2>Handling plugins</h2><h3 class="bullet">Find plugin instance in plugin.xml<code class="language-javascript"><pre>&lt;js-module src=&quot;www/sms.js&quot; name=&quot;Sms&quot;&gt;
   &lt;clobbers target=&quot;window.sms&quot; /&gt;
-&lt;/js-module&gt;</pre></code></h3><h3 class="bullet">Testing plugin instance<code class="language-javascript"><pre>if (typeof window.sms != 'undefined') {
+&lt;/js-module&gt;</pre></code></h3><h3 class="bullet">Testing for plugin instance<code class="language-javascript"><pre>if (typeof window.sms != 'undefined') {
     // code
-}</pre></code></h3></section><section><h2>Notifications using PushNotification</h2><h3 class="bullet">Urban Airship</h3><p>Lower data costs: switch from continuous replication by using notifications</p></section><section><h2>Thanks!</h2><p>Under Construction</p><p>More work todo!</p><p>Thanks for bespoke.js:</p><a href="http://twitter.com/markdalgleish">@markdalgleish</a></section></article><script src="bower_components/bespoke.js/dist/bespoke.min.js"></script><script src="bower_components/bespoke-bullets/dist/bespoke-bullets.min.js"></script><script src="bower_components/bespoke-scale/dist/bespoke-scale.min.js"></script><script src="bower_components/bespoke-hash/dist/bespoke-hash.min.js"></script><script src="bower_components/bespoke-progress/dist/bespoke-progress.min.js"></script><script src="bower_components/bespoke-state/dist/bespoke-state.min.js"></script><script src="bower_components/prism/prism.js"></script><script src="scripts/main.js"></script></body></html>
+}</pre></code></h3></section><section><h2>Notifications using PushNotification</h2><h3 class="bullet">Urban Airship</h3><p>Lower data costs: switch from continuous replication by using notifications</p></section><section><h2>Thanks!</h2><p>Thanks for bespoke.js:</p><a href="http://twitter.com/markdalgleish">@markdalgleish</a></section></article><script src="bower_components/bespoke.js/dist/bespoke.min.js"></script><script src="bower_components/bespoke-bullets/dist/bespoke-bullets.min.js"></script><script src="bower_components/bespoke-scale/dist/bespoke-scale.min.js"></script><script src="bower_components/bespoke-hash/dist/bespoke-hash.min.js"></script><script src="bower_components/bespoke-progress/dist/bespoke-progress.min.js"></script><script src="bower_components/bespoke-state/dist/bespoke-state.min.js"></script><script src="bower_components/prism/prism.js"></script><script src="scripts/main.js"></script></body></html>
