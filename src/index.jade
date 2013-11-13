@@ -11,48 +11,62 @@ html
     article
       section
         h2 Using PouchDB for PhoneGap/Cordova apps
-        p Chris Kelley
-        @chrisekelley
-      section
-        h2 Under Construction
-        p 3/11/2013: I've created a few slides; however, there are more to come.
-        p I will be updating these slides up to the date of my presentation on 12 November.
-        p I'm designing this with bespoke.js.
+        h3 Chris Kelley
+        p chrisekelley
+        p on github and twitter.
+
       section
         h3 UBridge: SMS -> Couch on Android in Uganda
         img(src='images/olutindoFlier.jpg')
+
+      section
+        h2 UBridge diagram
+        img(src='images/oluntindo-diagrams.png')
+
       section
         h2 UBridge
         img(src='images/olutindoAppHome.png', width='240', height='400', id='olutindoAppHome')
+
       section
-        h2 Sustainability
-        p Reduce monthly data costs
+        h2.bullet Hosting Criteria
+        ul
+          li Reliability
+          li Sustainability - Reduce monthly data costs
+
       section
         h2.bullet Hosting
         ul
           li Iriscouch - CORS support
           li Cloudant - BYO reverse proxy
           li Urban Airship - Notifications
+
       section
-        h2.bullet Using
+        h2.bullet This is an HTML5 App Using
         ul
-          li Apache CouchDB
-          li PouchDB
-          li Phonegap/Cordova 3.x
-          li Backbone.js
-          li Backbone-pouch.js
-          li Coconut
+          li Apache CouchDB - server
+          li PouchDB - local DB
+          li Phonegap/Cordova 3.x - container
+          li Backbone.js - MVC
+          li Backbone-pouch.js - DB connector
+          li Coconut - Form rendering
+
+      section
+        h2 Mobile Platform & Devices
+        ul
+          li Android
+          li Samsung Galaxy Tab 1 & 2
+          li Huawei Ascend Y300
+
       section
         h2 Why PouchDB?
-      section
-        h2 hood.ie!
-        p Not using but loving.
+
       section
         h2 Development Approach
         h3.bullet 2 projects
         ul
-          li Web app
+          li *** Web app ***
           li Android app
+
       section
         h2 Building the Android app
         p build.sh
@@ -61,6 +75,7 @@ html
             grunt cordova-build
             adb uninstall org.rti.olutindo_app
             adb install -r platforms/android/bin/Olutindo-debug.apk
+
       section
         h2 Transitioning TouchDB to PouchDB
 
@@ -69,6 +84,11 @@ html
         p Created pouchdb_views.js and named each query:
         code.language-javascript
           pre.
+            var byIncidentSorted = function(doc) {
+              if (doc.formId === "incident") {
+                emit(doc.lastModified, doc);
+              }
+            }
             var bySearchKeywords = function(doc) {
               if(doc.phone) {
                 emit(doc.phone, doc);
@@ -97,28 +117,105 @@ html
              );
 
       section
-        h2 Connector
-          h3.bullet backbone-pouch.js
-          p http://jo.github.io/backbone-pouch/
-
-      section
-        h2 Development Issues
-        h3.bullet Need to handle CORS:
-        ul
-          li Cordova fine
-          li WebDev not
+        h2 PouchDB Query Examples
+        h3 Fetch
         code.language-javascript
           pre.
-            var remoteCouch = "http://localhost:3000/troubletickets/"
-            + subdomain + "/" + credentials;
-            if (navigator.userAgent.match(/(iPhone|iPod|iPad|Android|BlackBerry|IEMobile)/)) {
-              remoteCouch = "https://" + credentials + "@" + subdomain
-              + ".cloudant.com/troubletickets/";
+            var record = new Incident({_id: incidentId});
+            record.fetch( {
+              success: function(model){
+              // do something
+                });
+              }
+            });
+        h3 Save
+        code.language-javascript
+          pre.
+            var record = new Record(formData);
+            record.save();
+
+      section
+        h2 Does it really have IndexedDB?
+        hr
+        code.language-javascript
+          pre.
+            var ua = navigator.userAgent;
+            var is412 = ua.indexOf("4.1.2");
+            var isGTP6200 = ua.indexOf("GT-P6200");
+            if ((is412) && (isGTP6200))
+            {
+              Backbone.sync = BackbonePouch.sync({
+                db: PouchDB('websql://troubletickets')
+              });
+            } else {
+              Backbone.sync = BackbonePouch.sync({
+                db: PouchDB('troubletickets')
+              });
             }
+
+      section
+        h2 Pagination
+        h3.bullet Use endkey instead of startkey for descending order.
+        hr
+        code.language-javascript
+          pre.
+            var opts = {
+              query: {
+                fun: {map: byIncidentSorted}
+                , descending:true
+                , endkey:parseInt(endkey)
+                , limit:limit
+              }
+            }
+
+      section
+        h2 Replication
+        h3.bullet CouchDB
+        code.language-javascript
+          pre.
+            var credentials = account.username + ":" + account.password;
+            couch = "http://" + credentials + "@192.168.1.60:5984/" + couchdb + "/";
+            var opts = {continuous: true,
+              withCredentials:true,
+              auth: {username:account.username, password:account.password},
+              complete: onComplete,
+              timeout: 60000};
+            Backbone.sync.defaults.db.replicate.to(couch, opts, ReplicationErrorLog);
+            Backbone.sync.defaults.db.replicate.from(couch, opts, ReplicationErrorLog);
+
+      section
+        h2.bullet Developing with PouchDB
+        ul
+          li Dev Tools -> Resources -> IndexedDB
+          li Removing the pouch
+            code.language-javascript
+              pre.
+                indexedDB.deleteDatabase('_pouch_troubletickets');
+
+      section
+        h2.bullet Puton
+        hr
+        img(src='images/puton.png')
+
+      section
+        h2 Development Issue
+        h3 CORS: Cross-origin resource sharing
+        p (bypass same origin security policy)
+        img(src='images/sameOriginPolicy.png')
+
+      //image kudos: http://www.quimeraazul.com/tutoriales/2011/02/ajax-entre-dominios-con-el-estandar-cors-cross-origin-resource-sharing/
+
+      section
+        h2 Where to enable CORS?
+        h3.bullet Cloudant needs CORS.
+        ul
+          li Cordova fine - same origin security policy disabled
+          li For browser dev, must enable CORS
+
       section
         h2 CORS solution:
-        p Using express + request to reverse proxy replication
-        p app.js:
+        h3 Using express for dev + request to reverse proxy replication
+        p app.js for express:
         code.language-javascript
           pre.
             var forward = require('./forward.js');
@@ -126,8 +223,9 @@ html
             app.use(express.static(__dirname + '../../www'));
             var target_url = "cloudant.com/troubletickets"
             app.use(forward(/\/troubletickets\/(.*)/, target_url));
+
       section
-        h2 CORS
+        h2 CORS solution:
         p Using express + request to reverse proxy replication
         p forward.js:
         code.language-javascript
@@ -144,10 +242,23 @@ html
              }
 
       section
+        h2 CORS solution:
+        h3.bullet Replication
+        code.language-javascript
+          pre.
+            var remoteCouch = "http://localhost:3000/troubletickets/"
+            + subdomain + "/" + credentials;
+            if (navigator.userAgent.match(/(iPhone|Android)/)) {
+              remoteCouch = "https://" + credentials + "@" + subdomain
+              + ".cloudant.com/troubletickets/";
+            }
+            Backbone.sync.defaults.db.replicate.to(couch, opts, ReplicationErrorLog);
+            Backbone.sync.defaults.db.replicate.from(couch, opts, ReplicationErrorLog);
+
+      section
         h2 Using Cordova
-        ul
-          li Plugins are cool!
-          li Do enough plugins support Cordova 3.0?
+        h3.bullet Do enough plugins support Cordova 3.0?
+
       section
         h2 Plugins i'm using
         ul
@@ -164,7 +275,7 @@ html
              cordova plugin add https://github.com/urbanairship/phonegap-ua-push.git
       section
         h2 Handling plugins
-        h3.bullet Handling plugin javascript
+        h3.bullet Load Cordova .js in Cordova only.
         code.language-javascript
           pre.
             if (navigator.useragent.match(/(iPhone|iPod|iPad|Android|BlackBerry|IEMobile)/)) {
@@ -175,13 +286,13 @@ html
               }
       section
         h2 Handling plugins
-        h3.bullet Finding plugin instance
+        h3.bullet Find plugin instance in plugin.xml
           code.language-javascript
             pre.
               <js-module src="www/sms.js" name="Sms">
                 <clobbers target="window.sms" />
               </js-module>
-        h3.bullet Testing plugin instance
+        h3.bullet Testing for plugin instance
           code.language-javascript
             pre.
               if (typeof window.sms != 'undefined') {
@@ -191,13 +302,9 @@ html
         h2 Notifications using PushNotification
         h3.bullet Urban Airship
         p Lower data costs: switch from continuous replication by using notifications
+
       section
         h2 Thanks!
-        p Under Construction
-        p More work todo!
-        p Thanks for bespoke.js:
-        a(href='http://twitter.com/markdalgleish') @markdalgleish
-
 
     script(src='bower_components/bespoke.js/dist/bespoke.min.js')
     script(src='bower_components/bespoke-bullets/dist/bespoke-bullets.min.js')
